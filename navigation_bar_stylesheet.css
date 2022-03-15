@@ -1,0 +1,12 @@
+.navbar
+{
+	color: blue;
+	background-color:#004080;
+	margin:auto;
+	text-align:right;
+}
+
+.nav,navbar-nav
+{
+	text-align:right;
+}

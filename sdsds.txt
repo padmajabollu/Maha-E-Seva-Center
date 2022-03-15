@@ -1,0 +1,165 @@
+<?php
+	session_start();
+	if(!(isset($_SESSION['admin'])))
+	{
+		header('Location:admin_login.php');
+	}
+?>
+
+<?php
+	$userid=0;
+
+include 'conn.php';
+	$certificate_name=array();
+	/*array_push($certificate_name, "Income");*/
+	$select="select DISTINCT service_name from services";
+	$result=mysqli_query($conn,$select);
+	if(mysqli_num_rows($result))
+	{
+		while($row=$result->fetch_assoc())
+		{
+			array_push($certificate_name, $row['service_name']);
+		}
+	}
+$flag=0;
+if(isset($_POST['store']))
+{
+
+	$cust_name1=$_POST['name'];
+	#echo $cust_name1;
+	#echo '<br>';
+	
+	$email1=$_POST['email'];
+	#echo $email1;
+	#echo '<br>';
+	
+	$contact1=$_POST['phno'];
+	#echo $contact1;
+	#echo '<br>';
+	
+	//$certificate1=$_POST['certificate'];
+	#echo $certificate1;
+	#echo '<br>';
+	$service_names=$_POST['certificate'];
+	/*
+	$select="SELECT user_id FROM user_reg where email='$email1' ";
+	$result = mysqli_query($conn,$select);
+	while($row = mysqli_fetch_assoc($result))
+	{
+		$userid=$row['user_id'];
+		#echo $userid;
+		#echo '<br>';
+	}*/
+	$userid=0;
+	$select2="SELECT UserID,Contact_no FROM customer_details where email='$email1' ";
+	$result = mysqli_query($conn,$select2);
+	$resultCheck = mysqli_num_rows($result);
+	if ($resultCheck<1)
+	{
+	$sql = "INSERT INTO customer_details(Cust_Name,email,Contact_no) 
+			VALUES(' $cust_name1','$email1','$contact1');";
+			
+	mysqli_query($conn,$sql);
+	
+	$update="UPDATE customer_details SET payment_status='no' WHERE UserID='$userid'  ";
+			mysqli_query($conn,$update)	;
+			$update="UPDATE customer_details SET status='no' WHERE UserID='$userid'  ";
+			mysqli_query($conn,$update)	;
+
+
+	}
+	$select="SELECT UserID FROM customer_details where email='$email1' ";
+	$result = mysqli_query($conn,$select);
+	while($row = mysqli_fetch_assoc($result))
+	{
+		$userid=$row['UserID'];
+		/*echo $userid;
+		*/#echo '<br>';
+	}
+	
+	if(count($service_names)>0)
+	{
+		foreach($service_names as $val)
+		{
+
+
+			$select1="SELECT * FROM service_image where service_name='$val'";
+			$result1 = mysqli_query($conn,$select1);
+			if($row1 = mysqli_fetch_assoc($result1))
+			{
+				$amount1=$row1['service_cost'] ;
+				
+				#echo $amount1;
+			}
+
+			$insert1="INSERT INTO cust_certificate(UserID,certificate_name,cert_amount) 
+					VALUES('$userid',' $val','$amount1')";
+
+					mysqli_query($conn,$insert1);
+
+				
+			$select="SELECT SUM(cert_amount) AS total FROM cust_certificate GROUP BY UserID HAVING UserID='$userid' ";		
+			$result = mysqli_query($conn,$select);
+			while($row = mysqli_fetch_assoc($result))
+			{
+			$total1=$row['total'];
+			#echo '<br>';
+			#echo $total1;
+			}
+			$update="UPDATE customer_details SET total='$total1' WHERE UserID='$userid'";
+				
+			mysqli_query($conn,$update);
+			
+		}
+		$flag=1;
+	
+	}
+	
+	else
+	{
+		$flag=2;
+	}
+
+	if($flag==0)
+	{
+		header('Location:Store_customer_details.php?record=no');
+
+	}
+	else if($flag==2)
+	{
+		header('Location:Store_customer_details.php?record=nosel');
+		
+	}
+	else
+	{
+		header('Location:user_details.php?record=yes');
+
+	}
+
+		
+}
+
+include 'conn_close.php';
+?>
+
+<?php
+$record=(isset($_GET['record']))?$_GET['record']:"";
+if($record=="no")
+{
+	echo '<script type="text/javascript">alert("Customer Details Not Stored")</script>';
+
+}
+else if($record=="yes")
+{
+	echo "
+	<script>
+		alert('Customer Details Stored Successfully');
+	</script>";
+	
+}
+else if($record=='nosel')
+{
+	echo '<script type="text/javascript">alert("Select the Certificate")</script>';
+
+}
+?>
