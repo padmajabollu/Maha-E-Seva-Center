@@ -5,6 +5,6 @@
     The website includes a payment gateway for payment of services and also provides bills through Email. Our clients could be students, citizens and anyone who require Certificates such as a caste certificate,7/12,cast validity, income certificate etc.
 
 # Technology Used
-    Web Technologies        :HTML,CSS, PHP, JavaScript<br>
+    Web Technologies        :HTML,CSS, PHP, JavaScript
     Database                :MySQL
     API                     :PHP-Mailer, Instamojo, Way2SMS
